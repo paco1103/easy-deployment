@@ -6,11 +6,11 @@
 
 1. Deploy the repository:
     ```
-    git deploy https://github.com/yourusername/easy-copy.git
+    git clone https://github.com/paco1103/easy-deployment.git
     ```
 2. Navigate to the project directory:
     ```
-    cd easy-copy
+    cd easy-deployment
     ```
 3. Make the script executable:
     ```
@@ -38,14 +38,14 @@ To make the script easily accessible from anywhere on your Mac, you can create a
 
 Now you can run the script from anywhere using:
 ```
-ezdeploy <source_directory> <target_directory> [--backup-separate <backup_directory>]
+ezdeploy <source_directory> <target_directory> [--backup-separate <backup_directory>] [--test]
 ```
 
 ## Usage
 
 To use the `easy_deploy.sh` script, run the following command:
 ```sh
-./easy_deploy.sh <source_directory> <target_directory> [--backup-separate <backup_directory>]
+./easy_deploy.sh <source_directory> <target_directory> [--backup-separate <backup_directory>] [--test]
 ```
 ## Example
 ```sh
@@ -53,7 +53,7 @@ To use the `easy_deploy.sh` script, run the following command:
  ./easy_deploy.sh /path/to/resource /path/to/destination --backup-separate /path/for/backup
 ```
 
-This will deploy the specified repository into the target folder and back in same location or separately.
+This will deploy the specified repository into the target folder and backup in same location or separately.
 
 ## Contributing
 
@@ -62,3 +62,7 @@ If you want to contribute to this project, please fork the repository and create
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
+## Watch More
+Easy Clone: https://github.com/paco1103/easy-clone (A script for cloning multiple files with folder structure in a single command)
