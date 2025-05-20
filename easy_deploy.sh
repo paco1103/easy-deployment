@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# Define color codes.
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+RED="\033[0;31m"
+NC="\033[0m"  # No Color
+
 usage() {
-    echo "Usage: $0 <source_directory> <target_directory> [--backup-separate <backup_directory>] [--test]"
+    echo -e "${YELLOW}Usage: $0 <source_directory> <target_directory> [--backup-separate <backup_directory>] [--deploy]${NC}"
     exit 1
 }
 
@@ -12,7 +18,7 @@ run_action() {
     if [ "$TEST_MODE" = false ]; then
         "$@"
     fi
-    echo "$msg"
+    echo -e "${GREEN}${msg}${NC}"
 }
 
 # Must have at least two arguments.
@@ -24,43 +30,51 @@ fi
 SRC_DIR="$1"
 TGT_DIR="$2"
 shift 2
+SRC_DIR="${SRC_DIR%/}"
+TGT_DIR="${TGT_DIR%/}"
 
 # Default backup mode: inline backup.
 BACKUP_SEPARATE=false
 # Default test mode: false.
-TEST_MODE=false
+TEST_MODE=true
 # Default backup directory: empty.
 BACKUP_DIR=""
+# Default backup file suffix: .bak.<date>.
+BACKUP_FILE_SUFFIX=".bak.$(date +%Y%m%d)"
 
 # Process optional flags.
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --backup-separate)
-            BACKUP_SEPARATE=true
-            shift
-            if [ -z "$1" ]; then
-                echo "Error: --backup-separate requires a directory argument"
-                exit 1
-            fi
-            BACKUP_DIR="$1"
-            shift
-            ;;
-        --test)
-            TEST_MODE=true
-            shift
-            ;;
-        *)
-            echo "Unknown parameter: $1"
-            usage
-            ;;
+    --backup-separate)
+        BACKUP_SEPARATE=true
+        shift
+        if [ -z "$1" ]; then
+            echo -e "${RED}Error: --backup-separate requires a directory argument${NC}"
+            exit 1
+        fi
+        BACKUP_DIR="$1"
+        shift
+        ;;
+    --deploy)
+        TEST_MODE=false
+        shift
+        ;;
+    *)
+        echo -e "${RED}Unknown parameter: $1${NC}"
+        usage
+        ;;
     esac
 done
 
-BACKUP_FILE_SUFFIX=".bak.$(date +%Y%m%d)"
+# Exit program if backup directory is not empty.
+if [ "$BACKUP_SEPARATE" = true ] && [ "$(ls -A "$BACKUP_DIR")" ]; then
+    echo -e "${RED}Error: Backup folder $BACKUP_DIR is not empty. Exiting.${NC}"
+    exit 1
+fi
 
 # Check if source directory exists.
 if [ ! -d "$SRC_DIR" ]; then
-    echo "Source directory does not exist: $SRC_DIR"
+    echo -e "${RED}Source directory does not exist: $SRC_DIR${NC}"
     exit 1
 fi
 
@@ -74,7 +88,7 @@ if [ "$BACKUP_SEPARATE" = true ]; then
     run_action "Create Directory: $BACKUP_DIR" mkdir -p "$BACKUP_DIR"
 fi
 
-echo "Start deploying files: $SRC_DIR -> $TGT_DIR"
+echo -e "${GREEN}Start deploying files: $SRC_DIR -> $TGT_DIR${NC}"
 
 # Create missing directories in target based on the source structure.
 find "$SRC_DIR" -type d | while IFS= read -r src_dir; do
@@ -105,7 +119,12 @@ find "$SRC_DIR" -type f | while IFS= read -r src_file; do
             run_action "Backup: $tgt_file -> $backup_file" cp "$tgt_file" "$backup_file"
         else
             backup_file="${tgt_file}${BACKUP_FILE_SUFFIX}"
-            run_action "Backup: $tgt_file -> $backup_file" cp "$tgt_file" "$backup_file"
+            # If the backup file already exists, then do not perform backup.
+            if [ ! -f "$backup_file" ]; then
+                run_action "${YELLOW}Backup: $tgt_file -> $backup_file" cp "$tgt_file" "$backup_file"
+            else
+                echo -e "${RED}Backup already exists: $backup_file${NC}"
+            fi
         fi
     fi
 
@@ -113,4 +132,4 @@ find "$SRC_DIR" -type f | while IFS= read -r src_file; do
     run_action "Copy: $src_file -> $tgt_file" cp "$src_file" "$tgt_file"
 done
 
-echo "Finished deploying files: $SRC_DIR -> $TGT_DIR"
+echo -e "${GREEN}Finished deploying files: $SRC_DIR -> $TGT_DIR${NC}"
