@@ -38,22 +38,39 @@ To make the script easily accessible from anywhere on your Mac, you can create a
 
 Now you can run the script from anywhere using:
 ```
-ezdeploy <source_directory> <target_directory> [--backup-separate <backup_directory>] [--test]
+ezdeploy <source_directory> <target_directory> [--backup-separate <backup_directory>] [--deploy]
 ```
 
 ## Usage
 
 To use the `easy_deploy.sh` script, run the following command:
 ```sh
-./easy_deploy.sh <source_directory> <target_directory> [--backup-separate <backup_directory>] [--test]
+./easy_deploy.sh <source_directory> <target_directory> [--backup-separate <backup_directory>] [--deploy]
 ```
 ## Example
 ```sh
- ./easy_deploy.sh /path/to/resource /path/to/destination
- ./easy_deploy.sh /path/to/resource /path/to/destination --backup-separate /path/for/backup
+./easy_deploy.sh /path/to/resource /path/to/destination
+./easy_deploy.sh /path/to/resource /path/to/destination --backup-separate /path/for/backup
+./easy_deploy.sh /path/to/resource /path/to/destination --backup-separate /path/for/backup --deploy
 ```
 
-This will deploy the specified repository into the target folder and backup in same location or separately.
+*The actual deployment is executed only when the ```--deploy``` flag is used.
+
+## Backup Behavior
+
+When deploying files, the script creates backups of existing target files before overwriting them. By default, if you do not provide the ```--backup-separate``` flag, each backup is created in the same directory as the original file with an appended extension that includes the date, like:  
+```
+source.txt.bak.yyyymmdd
+```
+
+Using the ```--backup-separate``` flag, you can specify a backup directory where all target files will be copied instead of storing backups in place. This approach helps keep the backup files separate from the main directory.
+
+For example:
+- Without ```--backup-separate```:  
+    The file ```/path/to/destination/file.txt``` is backed up as ```/path/to/destination/file.txt.bak.20231005```
+
+- With ```--backup-separate```:  
+    All files from ```/path/to/destination``` are backed up into the specified backup directory, e.g., ```/backup/location```, preserving their filenames.
 
 ## Contributing
 
